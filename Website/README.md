@@ -642,6 +642,12 @@ Open:
 http://localhost:3000/
 ```
 
+### Windows desktop launcher
+
+`Start-PartsAtlas.ps1` is the local Windows launcher used by the `PartsAtlas` desktop shortcut. It checks whether the website is already responding and simply opens it in the default browser when it is. Otherwise it starts the development server in a hidden PowerShell process, installs npm dependencies if `node_modules` is missing, waits up to five minutes for the website, and then opens it. Server output is written to `%LOCALAPPDATA%\PartsAtlas\server.log`.
+
+The launcher is intentionally kept inside the website folder so it is included in Git. The `.lnk` shortcut itself lives on Roy's Windows desktop and targets this script.
+
 Useful scripts:
 
 | Command | Purpose |

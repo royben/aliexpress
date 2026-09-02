@@ -662,7 +662,7 @@ Do not run a full production build merely to validate a CSS-only change while th
 
 ### Local data
 
-Local D1/R2 state is managed by the Cloudflare Vite plugin under project-local `.wrangler/`. Deleting that folder can remove the local catalog/media state used by the preview. Back it up before cleaning development artifacts.
+Local D1/R2 state is managed by the Cloudflare Vite plugin under project-local `.wrangler/`. Because this installation is intentionally local-only, the complete `.wrangler/` directory is tracked with Git LFS as part of the website backup. Stop the development server before committing so the SQLite database, R2 metadata, and R2 blobs form one consistent snapshot. Deleting that folder can remove the local catalog/media state used by the preview.
 
 The CSV files and original AliExpress/Temu folders are import sources, not the live application's serving layer. Editing them does not update the database until the importer runs.
 
@@ -828,13 +828,13 @@ The app creates/repairs its active schema dynamically in `ensureCatalog()`, whil
 
 A complete PartsAtlas backup requires both sides of the storage model:
 
-1. Export or copy the D1 database containing all `inventory_*` tables.
-2. Copy the R2 `UPLOADS` bucket containing product images and attachments.
+1. Stop the local development server so D1 and R2 are not being modified.
+2. Commit the complete Git-LFS-managed `.wrangler/` directory, which contains the local D1 database and R2 image/attachment storage.
 3. Keep the original CSV files and AliExpress/Temu asset folders as provenance and a partial rebuild source.
 4. Keep environment-variable names/documentation, but never store secret values in the backup repository.
 5. Verify recovery into an isolated environment before relying on the backup.
 
-The per-product ZIP export is useful for portable item records but is not a replacement for a whole-catalog backup. There is not yet a bulk `Export all products` archive route.
+The per-product ZIP export is useful for portable item records but is not a replacement for the Git-LFS-managed whole local catalog backup. A restored clone must fetch Git LFS objects and should use the locked Wrangler/Miniflare dependency versions. There is not yet a bulk `Export all products` archive route.
 
 ## Troubleshooting
 

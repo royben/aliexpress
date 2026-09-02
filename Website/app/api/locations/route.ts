@@ -1,0 +1,7 @@
+import { ensureCatalog } from "../../../db/catalog";
+
+async function seed(){const db=await ensureCatalog();const count=await db.prepare("SELECT COUNT(*) AS count FROM inventory_locations").first<{count:number}>();if(!count?.count)await db.batch([db.prepare("INSERT INTO inventory_locations (name,parent_id) VALUES ('Shelves',NULL)"),db.prepare("INSERT INTO inventory_locations (name,parent_id) VALUES ('Drawers',NULL)"),db.prepare("INSERT INTO inventory_locations (name,parent_id) VALUES ('Unsorted bags',NULL)")]);return db}
+
+export async function GET(){try{const db=await seed();const result=await db.prepare("SELECT * FROM inventory_locations ORDER BY parent_id,name").all();return Response.json({locations:result.results})}catch(error){return Response.json({error:error instanceof Error?error.message:"Locations unavailable"},{status:500})}}
+
+export async function POST(request:Request){try{const db=await seed();const payload=await request.json() as {name?:string;parentId?:number|null};const name=payload.name?.trim();if(!name)return Response.json({error:"Location name is required"},{status:400});const location=await db.prepare("INSERT INTO inventory_locations (name,parent_id) VALUES (?,?) RETURNING *").bind(name,payload.parentId||null).first();return Response.json({location},{status:201})}catch(error){return Response.json({error:error instanceof Error?error.message:"Could not create location"},{status:400})}}

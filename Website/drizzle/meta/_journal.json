@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1788297466781,
+      "tag": "0000_boring_diamondback",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788299125603,
+      "tag": "0001_violet_paibok",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788301590565,
+      "tag": "0002_smart_mandarin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788305629095,
+      "tag": "0003_plain_daredevil",
+      "breakpoints": true
+    }
+  ]
+}

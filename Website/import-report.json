@@ -1,0 +1,34 @@
+{
+  "generatedAt": "2026-09-01T22:28:05.494Z",
+  "sources": {
+    "AliExpress": 396,
+    "Temu": 124
+  },
+  "totalItems": 520,
+  "itemsWithoutListedImages": [
+    {
+      "serial": "PA-TM-00016",
+      "title": "Pre-Wired Micro LED Strips"
+    },
+    {
+      "serial": "PA-TM-00017",
+      "title": "300W DC-DC Adjustable Voltage Regulator"
+    },
+    {
+      "serial": "PA-TM-00019",
+      "title": "32pcs Dual-Sided PCB Prototype Kit"
+    },
+    {
+      "serial": "PA-TM-00035",
+      "title": "Adjustable DC-DC USB Power Supply Module"
+    },
+    {
+      "serial": "PA-TM-00118",
+      "title": "5-LED Battery Level Indicator"
+    }
+  ],
+  "listedImages": 6337,
+  "foundImages": 6337,
+  "missingImages": [],
+  "imageBytes": 446363527
+}

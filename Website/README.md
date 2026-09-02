@@ -648,6 +648,12 @@ http://localhost:3000/
 
 The launcher is intentionally kept inside the website folder so it is included in Git. The `.lnk` shortcut itself lives on Roy's Windows desktop and targets this script.
 
+### Local database and storage backup menu
+
+`PartsAtlas-Data-Backup.ps1` is an interactive backup/restore utility that is independent of Git. Run it from PowerShell or right-click it and choose **Run with PowerShell**. Its menu can create, list, inspect, and restore snapshots containing only the local D1 database and R2 product images/attachments.
+
+Snapshots are stored by default in the sibling folder `C:\Lab Orders\aliexpress\PartsAtlas Data Backups`. The tool stops PartsAtlas before copying data, records file counts and sizes in `manifest.json`, and offers to reopen a previously running website afterward. Restore requires typing `RESTORE`, creates a new `Before-Restore` safety snapshot first, swaps only the D1/R2 folders, verifies the restored counts and byte sizes, and automatically rolls back if copying or verification fails.
+
 Useful scripts:
 
 | Command | Purpose |

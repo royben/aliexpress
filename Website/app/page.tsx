@@ -18,6 +18,9 @@ export type Item = {
 
 type Location = {id:number;name:string;parent_id:number|null;notes?:string};
 
+const INVENTORY_SCROLL_KEY="parts-atlas-inventory-scroll";
+const INVENTORY_SCROLL_TTL=5*60*1000;
+
 async function webReadyImage(file:File){if(file.size<800*1024)return file;const bitmap=await createImageBitmap(file);const scale=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);canvas.getContext("2d")?.drawImage(bitmap,0,0,canvas.width,canvas.height);const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,"image/webp",.8));bitmap.close();return blob?new File([blob],`${file.name.replace(/\.[^.]+$/,"")}.webp`,{type:"image/webp"}):file}
 
 export default function Home(){
@@ -33,12 +36,16 @@ export default function Home(){
   const[filterPreferencesReady,setFilterPreferencesReady]=useState(false);
   const[toast,setToast]=useState("");
   const[loading,setLoading]=useState(true);
+  const pendingInventoryScroll=useRef<number|null>(null);
+  const restoringInventoryScroll=useRef(false);
 
   const refresh=()=>fetch("/api/items?limit=1000").then(r=>r.json()).then(d=>{setItems(d.items||[]);setLoading(false)}).catch(()=>setLoading(false));
-  useEffect(()=>{refresh();const params=new URLSearchParams(window.location.search);const requested=params.get("view");if(requested&&["Overview","Inventory","Locations","Settings","Help & feedback"].includes(requested))setActiveNav(requested);if(params.get("modal")==="ai")setModal("ai")},[]);
+  useEffect(()=>{if("scrollRestoration" in history)history.scrollRestoration="manual";refresh();const params=new URLSearchParams(window.location.search);const requested=params.get("view");if(requested&&["Overview","Inventory","Locations","Settings","Help & feedback"].includes(requested))setActiveNav(requested);if(requested==="Inventory"){try{const saved=JSON.parse(sessionStorage.getItem(INVENTORY_SCROLL_KEY)||"null");if(saved&&Number.isFinite(saved.y)&&Number.isFinite(saved.savedAt)&&Date.now()-saved.savedAt<=INVENTORY_SCROLL_TTL)pendingInventoryScroll.current=Math.max(0,saved.y);else sessionStorage.removeItem(INVENTORY_SCROLL_KEY)}catch{sessionStorage.removeItem(INVENTORY_SCROLL_KEY)}}if(params.get("modal")==="ai")setModal("ai")},[]);
   useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem("parts-atlas-inventory-filters")||"{}");if(Array.isArray(saved.categories))setSelectedCategories(saved.categories);if(Array.isArray(saved.tags))setSelectedTags(saved.tags)}catch{}finally{setFilterPreferencesReady(true)}},[]);
   useEffect(()=>{if(filterPreferencesReady)localStorage.setItem("parts-atlas-inventory-filters",JSON.stringify({categories:selectedCategories,tags:selectedTags}))},[filterPreferencesReady,selectedCategories,selectedTags]);
   useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(""),3200);return()=>clearTimeout(timer)},[toast]);
+  useEffect(()=>{if(activeNav!=="Inventory")return;const onScroll=()=>{if(restoringInventoryScroll.current)return;sessionStorage.setItem(INVENTORY_SCROLL_KEY,JSON.stringify({y:window.scrollY,savedAt:Date.now()}))};window.addEventListener("scroll",onScroll,{passive:true});return()=>window.removeEventListener("scroll",onScroll)},[activeNav]);
+  useEffect(()=>{if(activeNav!=="Inventory"||loading||!filterPreferencesReady||pendingInventoryScroll.current===null)return;const target=pendingInventoryScroll.current;pendingInventoryScroll.current=null;restoringInventoryScroll.current=true;let frame=0;let request=0;const restore=()=>{window.scrollTo({top:target,left:0,behavior:"auto"});if(frame++<3)request=requestAnimationFrame(restore);else restoringInventoryScroll.current=false};request=requestAnimationFrame(restore);return()=>{cancelAnimationFrame(request);restoringInventoryScroll.current=false}},[activeNav,loading,filterPreferencesReady]);
 
   const categories=useMemo(()=>[...new Set(items.map(i=>i.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),[items]);
   const categoryCounts=useMemo(()=>{const counts=new Map<string,number>();items.forEach(i=>counts.set(i.category,(counts.get(i.category)||0)+1));return [...counts].sort((a,b)=>a[0].localeCompare(b[0]))},[items]);
